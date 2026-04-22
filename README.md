@@ -41,6 +41,23 @@ Then open:
 - API: `http://127.0.0.1:8000/api/manager`
 - UI: `http://127.0.0.1:8000/`
 
+## Terminal PR Helper
+
+Use the included script to create a pull request from terminal, or reuse an
+existing open PR for the same head branch:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\open_pr.ps1 `
+  -Repo "Merlin-Machines/vault" `
+  -Base "main" `
+  -Head "feature/live-directive-state" `
+  -Title "MGMT updates"
+```
+
+Requirements:
+- Set `GITHUB_TOKEN` in your shell before running.
+- Script returns the existing PR URL if one is already open for that branch.
+
 ## Next steps
 
 - deepen the runtime adapter with richer execution telemetry
