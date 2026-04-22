@@ -8,6 +8,24 @@ const state = {
   controlsDirty: false,
 };
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function formatMoney(value) {
+  const numeric = Number(value || 0);
+  return `$${numeric.toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}`;
+}
+
+function formatPct(value, digits = 2) {
+  return `${Number(value || 0).toFixed(digits)}%`;
+}
+
 function showToast(message, isError = false) {
   toast.textContent = message;
   toast.classList.remove("hidden");
@@ -31,9 +49,9 @@ async function request(path, options = {}) {
 function metric(label, value, meta = "") {
   return `
     <div class="metric">
-      <span class="label">${label}</span>
-      <span class="value">${value}</span>
-      <span class="meta">${meta}</span>
+      <span class="label">${escapeHtml(label)}</span>
+      <span class="value">${escapeHtml(value)}</span>
+      <span class="meta">${escapeHtml(meta)}</span>
     </div>
   `;
 }
@@ -67,20 +85,32 @@ function syncForm(manager) {
 }
 
 function renderTop(manager) {
-  const { live, baseline, controls, review, telemetry, integrations } = manager;
-  document.getElementById("runtime-pill").textContent = controls.trading_enabled ? "Trading enabled" : "Trading paused";
+  const { live, baseline, controls, review, telemetry, runtime, market, integrations } = manager;
+  document.getElementById("runtime-pill").textContent = runtime.connected ? "Runtime linked" : "Runtime queued";
   document.getElementById("live-pill").textContent = `Live: ${live.name}`;
   document.getElementById("baseline-pill").textContent = `Baseline: ${baseline.name}`;
   document.getElementById("mode-pill").textContent = `Mode: ${controls.strategy_mode}`;
   document.getElementById("hero-review").textContent = review.headline;
   document.getElementById("toggle-trading").textContent = controls.trading_enabled ? "Pause Trading" : "Resume Trading";
 
+  const runtimeMeta = runtime.connected ? runtime.base_url : "standalone mode";
+  const marketSummary = market.summary || "Market summary pending.";
   document.getElementById("metrics").innerHTML = [
-    metric("P&L USD", `$${Number(telemetry.pnl_usd).toFixed(2)}`, review.scorecard[0] || ""),
+    metric("P&L USD", formatMoney(telemetry.pnl_usd), review.scorecard[0] || ""),
     metric("Today Trades", String(telemetry.today_trades), `${telemetry.total_trades} total tracked`),
     metric("Open Positions", String(telemetry.open_positions), `Runtime: ${telemetry.runtime_state}`),
-    metric("Profiles", String((manager.profiles || []).length), integrations.github.note),
+    metric("Market", market.status.toUpperCase(), marketSummary),
   ].join("");
+
+  document.getElementById("runtime-note").textContent = runtime.notes.join(" ");
+  document.getElementById("runtime-endpoints").innerHTML = (runtime.available_endpoints || []).length
+    ? runtime.available_endpoints.map((item) => `<span class="tag">${escapeHtml(item)}</span>`).join("")
+    : `<span class="tag muted">offline</span>`;
+
+  const runtimeLink = document.getElementById("open-runtime-link");
+  runtimeLink.href = `${runtime.base_url}/mgmt`;
+  runtimeLink.textContent = runtime.connected ? "Open Runtime" : "Open Runtime Target";
+  runtimeLink.title = runtimeMeta;
 
   document.getElementById("tv-symbol").value = integrations.tradingview.default_symbol || "BINANCE:BTCUSDT";
   renderTradingView(document.getElementById("tv-symbol").value, integrations.tradingview);
@@ -89,29 +119,133 @@ function renderTop(manager) {
 function renderReview(manager) {
   const blocks = [];
   const review = manager.review || {};
-  (review.scorecard || []).forEach((line) => blocks.push(`<div class="item"><strong>Scorecard</strong><p>${line}</p></div>`));
-  (review.reinforcements || []).forEach((line) => blocks.push(`<div class="item"><strong>Reinforce</strong><p>${line}</p></div>`));
-  (review.coaching || []).forEach((line) => blocks.push(`<div class="item"><strong>Coach</strong><p>${line}</p></div>`));
-  (review.risks || []).forEach((line) => blocks.push(`<div class="item"><strong>Risk</strong><p>${line}</p></div>`));
+  (review.scorecard || []).forEach((line) => blocks.push(`<div class="item"><strong>Scorecard</strong><p>${escapeHtml(line)}</p></div>`));
+  (review.reinforcements || []).forEach((line) => blocks.push(`<div class="item"><strong>Reinforce</strong><p>${escapeHtml(line)}</p></div>`));
+  (review.coaching || []).forEach((line) => blocks.push(`<div class="item"><strong>Coach</strong><p>${escapeHtml(line)}</p></div>`));
+  (review.risks || []).forEach((line) => blocks.push(`<div class="item"><strong>Risk</strong><p>${escapeHtml(line)}</p></div>`));
   document.getElementById("review-list").innerHTML = blocks.join("");
 }
 
 function renderValidation(manager) {
   const validation = manager.validation || {};
   const blocks = [];
-  (validation.errors || []).forEach((line) => blocks.push(`<div class="item"><strong>Error</strong><p>${line}</p></div>`));
-  (validation.warnings || []).forEach((line) => blocks.push(`<div class="item"><strong>Warning</strong><p>${line}</p></div>`));
+  (validation.errors || []).forEach((line) => blocks.push(`<div class="item warn"><strong>Error</strong><p>${escapeHtml(line)}</p></div>`));
+  (validation.warnings || []).forEach((line) => blocks.push(`<div class="item caution"><strong>Warning</strong><p>${escapeHtml(line)}</p></div>`));
   if (validation.replay) {
     blocks.push(
-      `<div class="item"><strong>Replay</strong><p>` +
-      `Sample ${validation.replay.sample_size} · ` +
-      `Qualified ${validation.replay.qualified_trades} · ` +
-      `Est P&L $${Number(validation.replay.estimated_pnl_usdc).toFixed(2)} · ` +
-      `Est win rate ${Number(validation.replay.estimated_win_rate_pct).toFixed(1)}%` +
-      `</p></div>`
+      `<div class="item">` +
+      `<strong>Replay</strong>` +
+      `<p>Sample ${escapeHtml(validation.replay.sample_size)} | Qualified ${escapeHtml(validation.replay.qualified_trades)} | ` +
+      `Est P&amp;L ${escapeHtml(formatMoney(validation.replay.estimated_pnl_usdc))} | ` +
+      `Est win rate ${escapeHtml(formatPct(validation.replay.estimated_win_rate_pct, 1))}</p>` +
+      `</div>`
     );
   }
   document.getElementById("validation-list").innerHTML = blocks.join("");
+}
+
+function renderMarket(manager) {
+  const market = manager.market || {};
+  document.getElementById("market-summary").textContent = `${market.summary || "Waiting for market snapshot."} ${market.risk_note || ""}`.trim();
+
+  document.getElementById("ticker-grid").innerHTML = (market.tickers || []).map((ticker) => `
+    <div class="ticker-card">
+      <div class="ticker-head">
+        <strong>${escapeHtml(ticker.symbol)}</strong>
+        <span class="tag ${escapeHtml(ticker.regime || "mixed")}">${escapeHtml(ticker.regime || "mixed")}</span>
+      </div>
+      <div class="ticker-price">${escapeHtml(formatMoney(ticker.price))}</div>
+      <div class="ticker-meta">${escapeHtml(formatPct(ticker.change_pct_24h))} 24h | ${escapeHtml(formatMoney(ticker.quote_volume_usd || 0))} volume</div>
+      <div class="ticker-meta">
+        Funding ${ticker.funding_rate_pct == null ? "n/a" : escapeHtml(formatPct(ticker.funding_rate_pct, 4))} |
+        OI ${ticker.open_interest_usd == null ? "n/a" : escapeHtml(formatMoney(ticker.open_interest_usd))}
+      </div>
+      <p>${escapeHtml(ticker.note || "")}</p>
+    </div>
+  `).join("");
+
+  document.getElementById("technical-grid").innerHTML = (market.technicals || []).map((item) => `
+    <div class="tech-card">
+      <div class="tech-top">
+        <strong>${escapeHtml(item.symbol)}</strong>
+        <span class="tag ${escapeHtml(item.stance || "mixed")}">${escapeHtml(item.stance || "mixed")}</span>
+      </div>
+      <div class="tech-row">
+        <span>RA</span>
+        <span>${escapeHtml(item.ra_label)} (${escapeHtml(item.ra_score)})</span>
+      </div>
+      <div class="tech-row">
+        <span>RSI</span>
+        <span>${escapeHtml(item.rsi)}</span>
+      </div>
+      <div class="tech-row">
+        <span>MACD</span>
+        <span>${escapeHtml(item.macd_bias)} (${escapeHtml(item.macd_hist)})</span>
+      </div>
+      <div class="tech-row">
+        <span>Bollinger</span>
+        <span>${escapeHtml(item.bollinger_signal)} / ${escapeHtml(formatPct(item.bollinger_bandwidth_pct))}</span>
+      </div>
+      <div class="tech-row">
+        <span>Momentum</span>
+        <span>${escapeHtml(formatPct(item.momentum_pct))}</span>
+      </div>
+      <div class="tech-row">
+        <span>ATR</span>
+        <span>${escapeHtml(formatPct(item.atr_pct))}</span>
+      </div>
+      <div class="tech-row">
+        <span>Volume</span>
+        <span>${escapeHtml(`${Number(item.volume_ratio || 0).toFixed(2)}x`)}</span>
+      </div>
+      <div class="tech-row">
+        <span>Alignment</span>
+        <span>${escapeHtml(`${item.alignment_score}/5`)}</span>
+      </div>
+      <p>${escapeHtml(item.summary || "")}</p>
+    </div>
+  `).join("");
+}
+
+function renderLayers(manager) {
+  document.getElementById("layers-list").innerHTML = (manager.strategy_layers || []).map((layer) => `
+    <div class="item layer-card">
+      <div class="item-head">
+        <strong>${escapeHtml(layer.name)}</strong>
+        <span class="tag ${escapeHtml(layer.posture || "watch")}">${escapeHtml(layer.posture || "watch")}</span>
+      </div>
+      <p>${escapeHtml(layer.thesis || "")}</p>
+      <div class="trigger-list">${(layer.triggers || []).map((trigger) => `<span class="tag">${escapeHtml(trigger)}</span>`).join("")}</div>
+      <div class="meta">${escapeHtml(layer.risk_note || "")}</div>
+    </div>
+  `).join("");
+}
+
+function renderIntel(manager) {
+  document.getElementById("intel-list").innerHTML = (manager.intel_feed || []).map((item) => `
+    <div class="item intel-card">
+      <div class="item-head">
+        <strong>${escapeHtml(item.title)}</strong>
+        <span class="tag ${escapeHtml(item.sentiment || "neutral")}">${escapeHtml(item.sentiment || "neutral")}</span>
+      </div>
+      <p>${escapeHtml(item.summary || "")}</p>
+      <div class="meta">
+        ${escapeHtml(item.source)} | ${escapeHtml(item.category)}${item.published_at ? ` | ${escapeHtml(new Date(item.published_at).toLocaleString())}` : ""}
+      </div>
+      <a href="${escapeHtml(item.url)}" target="_blank" rel="noreferrer">Open source</a>
+    </div>
+  `).join("");
+}
+
+function renderResearch(manager) {
+  document.getElementById("research-list").innerHTML = (manager.research_library || []).map((item) => `
+    <div class="item">
+      <strong>${escapeHtml(item.title)}</strong>
+      <p>${escapeHtml(item.note || "")}</p>
+      <div class="meta">${escapeHtml(item.source)} | ${escapeHtml(item.category)}</div>
+      <a href="${escapeHtml(item.url)}" target="_blank" rel="noreferrer">${escapeHtml(item.url)}</a>
+    </div>
+  `).join("");
 }
 
 function renderIntegrations(manager) {
@@ -120,27 +254,27 @@ function renderIntegrations(manager) {
   const items = [];
   items.push(
     `<div class="item"><strong>GitHub workflow</strong>` +
-    `<p><a href="${integrations.github.repo_url}" target="_blank" rel="noreferrer">${integrations.github.repo_url}</a></p>` +
-    `<div class="meta">${integrations.github.note}</div></div>`
+    `<p><a href="${escapeHtml(integrations.github.repo_url)}" target="_blank" rel="noreferrer">${escapeHtml(integrations.github.repo_url)}</a></p>` +
+    `<div class="meta">${escapeHtml(integrations.github.note || "")}</div></div>`
   );
   items.push(
-    `<div class="item"><strong>NOAA</strong><p>${weather.noaa.coverage}</p>` +
-    `<div class="meta">${weather.noaa.endpoint || ""}</div></div>`
+    `<div class="item"><strong>NOAA</strong><p>${escapeHtml(weather.noaa.coverage || "")}</p>` +
+    `<div class="meta">${escapeHtml(weather.noaa.endpoint || "")}</div></div>`
   );
   items.push(
-    `<div class="item"><strong>Weather Company</strong><p>${weather.weather_company.coverage}</p>` +
-    `<div class="meta">${weather.weather_company.docs_url}</div></div>`
+    `<div class="item"><strong>Weather Company</strong><p>${escapeHtml(weather.weather_company.coverage || "")}</p>` +
+    `<div class="meta">${escapeHtml(weather.weather_company.docs_url || "")}</div></div>`
   );
   items.push(
-    `<div class="item"><strong>WeatherAPI via RapidAPI</strong><p>${weather.weatherapi_rapidapi.coverage}</p>` +
-    `<div class="meta">${weather.weatherapi_rapidapi.host || ""}</div></div>`
+    `<div class="item"><strong>WeatherAPI via RapidAPI</strong><p>${escapeHtml(weather.weatherapi_rapidapi.coverage || "")}</p>` +
+    `<div class="meta">${escapeHtml(weather.weatherapi_rapidapi.host || "")}</div></div>`
   );
   items.push(
-    `<div class="item"><strong>TradingView</strong><p>${integrations.tradingview.notes.join(" ")}</p>` +
-    `<div class="meta">${integrations.tradingview.docs_url}</div></div>`
+    `<div class="item"><strong>TradingView</strong><p>${escapeHtml((integrations.tradingview.notes || []).join(" "))}</p>` +
+    `<div class="meta">${escapeHtml(integrations.tradingview.docs_url || "")}</div></div>`
   );
   document.getElementById("integrations-list").innerHTML = items.join("");
-  document.getElementById("chart-meta").textContent = `TradingView ${integrations.tradingview.integration_mode} · ${integrations.tradingview.default_symbol}`;
+  document.getElementById("chart-meta").textContent = `TradingView ${integrations.tradingview.integration_mode} | ${integrations.tradingview.default_symbol}`;
 }
 
 function renderDiffAudit(manager) {
@@ -149,9 +283,9 @@ function renderDiffAudit(manager) {
   document.getElementById("diff-list").innerHTML = diff.length
     ? diff.map((item) => `
       <div class="diff-item">
-        <strong>${item.field}</strong>
-        <div class="meta">from ${JSON.stringify(item.from)}</div>
-        <div class="meta">to ${JSON.stringify(item.to)}</div>
+        <strong>${escapeHtml(item.field)}</strong>
+        <div class="meta">from ${escapeHtml(JSON.stringify(item.from))}</div>
+        <div class="meta">to ${escapeHtml(JSON.stringify(item.to))}</div>
       </div>
     `).join("")
     : `<div class="item"><strong>No diff</strong><p>Live directive matches the current baseline.</p></div>`;
@@ -159,9 +293,9 @@ function renderDiffAudit(manager) {
   document.getElementById("audit-list").innerHTML = audit.length
     ? audit.map((entry) => `
       <div class="audit-item">
-        <strong>${entry.event}</strong>
-        <p>${entry.detail}</p>
-        <div class="meta">${new Date(entry.at).toLocaleString()} · ${entry.actor}</div>
+        <strong>${escapeHtml(entry.event)}</strong>
+        <p>${escapeHtml(entry.detail)}</p>
+        <div class="meta">${escapeHtml(new Date(entry.at).toLocaleString())} | ${escapeHtml(entry.actor)}</div>
       </div>
     `).join("")
     : "";
@@ -201,6 +335,10 @@ async function refresh() {
   renderTop(manager);
   renderReview(manager);
   renderValidation(manager);
+  renderMarket(manager);
+  renderLayers(manager);
+  renderIntel(manager);
+  renderResearch(manager);
   renderIntegrations(manager);
   renderDiffAudit(manager);
 }
@@ -331,4 +469,4 @@ document.getElementById("profile-name").addEventListener("input", () => { state.
 });
 
 refresh().catch((error) => showToast(error.message, true));
-setInterval(() => refresh().catch(() => {}), 20000);
+setInterval(() => refresh().catch(() => {}), 25000);

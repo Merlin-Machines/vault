@@ -17,6 +17,11 @@ def validate_probability_threshold(value: int) -> None:
         raise PolicyError("Indicator alignment must remain between 1 and 5.")
 
 
+def validate_entry_count(value: int) -> None:
+    if not 1 <= value <= 5:
+        raise PolicyError("Entries per cycle must remain between 1 and 5.")
+
+
 def validate_pct(value: float, label: str) -> None:
     if not 0.0 <= value <= 0.5:
         raise PolicyError(f"{label} must remain between 0.00 and 0.50.")

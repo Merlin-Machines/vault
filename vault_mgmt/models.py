@@ -90,6 +90,8 @@ class TelemetryState(BaseModel):
     open_positions: int = 3
     total_trades: int = 18
     today_trades: int = 6
+    account_name: str = "ACCOUNT"
+    wallet: str = ""
     source: str = "seeded"
     synced_at: datetime = Field(default_factory=utc_now)
 
@@ -139,6 +141,92 @@ class IntegrationsState(BaseModel):
     github: WorkflowIntegration
 
 
+class RuntimeSyncState(BaseModel):
+    connected: bool = False
+    status: str = "disconnected"
+    base_url: str = "http://127.0.0.1:7731"
+    linked_runtime: str = "POLY_AGENT_Merlin"
+    source: str = "seeded"
+    last_error: str | None = None
+    available_endpoints: List[str] = Field(default_factory=list)
+    notes: List[str] = Field(default_factory=list)
+    synced_at: datetime = Field(default_factory=utc_now)
+
+
+class MarketTicker(BaseModel):
+    symbol: str
+    price: float
+    change_pct_24h: float = 0.0
+    quote_volume_usd: float = 0.0
+    funding_rate_pct: float | None = None
+    open_interest_usd: float | None = None
+    spread_pct: float | None = None
+    regime: str = "mixed"
+    note: str = ""
+
+
+class TechnicalSnapshot(BaseModel):
+    symbol: str
+    interval: str = "5m"
+    last_price: float
+    ra_score: float = 0.0
+    ra_label: str = "neutral"
+    rsi: float = 50.0
+    momentum_pct: float = 0.0
+    trend: str = "neutral"
+    ema_fast: float = 0.0
+    ema_slow: float = 0.0
+    macd: float = 0.0
+    macd_signal: float = 0.0
+    macd_hist: float = 0.0
+    macd_bias: str = "neutral"
+    bollinger_upper: float = 0.0
+    bollinger_middle: float = 0.0
+    bollinger_lower: float = 0.0
+    bollinger_bandwidth_pct: float = 0.0
+    bollinger_signal: str = "neutral"
+    atr_pct: float = 0.0
+    volume_ratio: float = 1.0
+    alignment_score: int = 0
+    stance: str = "neutral"
+    summary: str = ""
+
+
+class MarketOverview(BaseModel):
+    status: str = "seeded"
+    as_of: datetime = Field(default_factory=utc_now)
+    summary: str = "Waiting for market data."
+    risk_note: str = "Market intelligence is not hydrated yet."
+    tickers: List[MarketTicker] = Field(default_factory=list)
+    technicals: List[TechnicalSnapshot] = Field(default_factory=list)
+
+
+class IntelFeedItem(BaseModel):
+    source: str
+    category: str
+    title: str
+    url: str
+    sentiment: str = "neutral"
+    summary: str = ""
+    published_at: datetime | None = None
+
+
+class ResearchSource(BaseModel):
+    source: str
+    category: str
+    title: str
+    url: str
+    note: str = ""
+
+
+class StrategyLayer(BaseModel):
+    name: str
+    posture: str
+    thesis: str
+    triggers: List[str] = Field(default_factory=list)
+    risk_note: str = ""
+
+
 class ManagerState(BaseModel):
     id: str = "vault-mgmt-01"
     name: str = "Vault MGMT"
@@ -152,7 +240,12 @@ class ManagerState(BaseModel):
     validation: ValidationState
     review: ReviewState
     telemetry: TelemetryState
+    runtime: RuntimeSyncState = Field(default_factory=RuntimeSyncState)
+    market: MarketOverview = Field(default_factory=MarketOverview)
     integrations: IntegrationsState
+    intel_feed: List[IntelFeedItem] = Field(default_factory=list)
+    research_library: List[ResearchSource] = Field(default_factory=list)
+    strategy_layers: List[StrategyLayer] = Field(default_factory=list)
     profiles: List[str] = Field(default_factory=list)
     diff: List[dict] = Field(default_factory=list)
     audit_log: List[AuditEvent] = Field(default_factory=list)

@@ -19,12 +19,13 @@
           <p class="eyebrow">GitHub Coordination Hub</p>
           <h1>Vault MGMT</h1>
           <p class="lede">
-            The shared manager layer for Chat dev and Codex. Live directives stay visible,
-            safe runtime knobs stay operator-controlled, and the repo remains dry-run safe.
+            The separate manager console for POLY Agent Merlin. Directives, live runtime sync,
+            market intelligence, and operator-safe knobs all stay visible in one place.
           </p>
         </div>
         <div class="masthead-actions">
           <a class="link-btn" href="https://github.com/Merlin-Machines/vault" target="_blank" rel="noreferrer">Open Repo</a>
+          <a class="ghost-btn" id="open-runtime-link" href="http://127.0.0.1:7731/mgmt" target="_blank" rel="noreferrer">Open Runtime</a>
           <button class="ghost-btn" id="refresh-now" type="button">Refresh</button>
           <button class="solid-btn" id="toggle-trading" type="button">Toggle Trading</button>
         </div>
@@ -33,7 +34,7 @@
       <section class="hero">
         <div class="hero-main">
           <div class="hero-strip">
-            <div class="pill" id="runtime-pill">Loading</div>
+            <div class="pill" id="runtime-pill">Runtime</div>
             <div class="pill" id="live-pill">Live directive</div>
             <div class="pill" id="baseline-pill">Baseline</div>
             <div class="pill" id="mode-pill">Mode</div>
@@ -51,6 +52,14 @@
               <button class="ghost-btn" id="update-directive" type="button">Update Live Directive</button>
               <button class="ghost-btn" id="commit-baseline" type="button">Commit Baseline</button>
             </div>
+          </div>
+
+          <div class="runtime-brief">
+            <div>
+              <div class="subhead">Runtime bridge</div>
+              <p id="runtime-note">Waiting for runtime handshake.</p>
+            </div>
+            <div class="endpoint-list" id="runtime-endpoints"></div>
           </div>
         </div>
 
@@ -73,7 +82,7 @@
           <div class="panel-head">
             <div>
               <h2>Directive Composer</h2>
-              <p>Use plain language. In this repo, the directive becomes the live manager narrative immediately.</p>
+              <p>Write in plain language. Vault keeps it operator-friendly, and syncs it into the runtime when available.</p>
             </div>
           </div>
           <div class="panel-body">
@@ -83,7 +92,7 @@
             </label>
             <label class="field">
               <span>Live Directive</span>
-              <textarea id="directive-text" rows="9" spellcheck="false"></textarea>
+              <textarea id="directive-text" rows="10" spellcheck="false"></textarea>
             </label>
           </div>
         </section>
@@ -91,8 +100,22 @@
         <section class="panel">
           <div class="panel-head">
             <div>
+              <h2>Market Board</h2>
+              <p>5-minute tape, technical stack, and a compact read on what the manager is looking at right now.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <p class="panel-summary" id="market-summary">Waiting for market snapshot.</p>
+            <div class="ticker-grid" id="ticker-grid"></div>
+            <div class="technical-grid" id="technical-grid"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
               <h2>Safe Runtime Knobs</h2>
-              <p>These controls are the shared surface between manager intent and execution runtime.</p>
+              <p>These controls shape execution behavior without exposing raw code edits in the live agent.</p>
             </div>
           </div>
           <div class="panel-body">
@@ -153,7 +176,7 @@
           <div class="panel-head">
             <div>
               <h2>Review + Validation</h2>
-              <p>Keep the shared repo honest about what is seeded and what still needs runtime wiring.</p>
+              <p>Keep the manager honest about edge quality, runtime safety, and how much of this is live versus seeded.</p>
             </div>
           </div>
           <div class="panel-body two-col">
@@ -171,8 +194,32 @@
         <section class="panel">
           <div class="panel-head">
             <div>
+              <h2>Strategy Layers</h2>
+              <p>Separate lenses for dislocations, momentum, catalysts, and risk control so the manager can direct with intent.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div id="layers-list" class="stack-list"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Intel Feed</h2>
+              <p>Live headlines and community scan so the manager can see catalysts without leaving the desk.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div id="intel-list" class="stack-list"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
               <h2>Integrations + Workflow</h2>
-              <p>Track source intent here while the runtime adapter catches up.</p>
+              <p>Track market data, weather, TradingView, and GitHub coordination in one view.</p>
             </div>
           </div>
           <div class="panel-body">
@@ -180,11 +227,23 @@
           </div>
         </section>
 
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Research Library</h2>
+              <p>Quick access to reference material, YouTube searches, repo surfaces, and data sources worth keeping nearby.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div id="research-list" class="stack-list"></div>
+          </div>
+        </section>
+
         <section class="panel panel-wide">
           <div class="panel-head">
             <div>
               <h2>Diff + Audit</h2>
-              <p>Baseline drift and operator actions stay visible so Chat dev and Codex see the same state story.</p>
+              <p>Baseline drift and operator actions stay visible so Chat dev and Codex read the same operational story.</p>
             </div>
             <div class="interventions">
               <button class="ghost-btn" data-intervention="pause" type="button">Pause</button>

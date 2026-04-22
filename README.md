@@ -8,6 +8,9 @@ This repository starts with a dry-run-safe manager shell focused on:
 - safe runtime knobs
 - operator-facing interface
 - audit visibility
+- runtime bridge into `POLY_AGENT_Merlin` when the local dashboard is online
+- live market board with 5-minute technicals
+- news, community, and research context panels
 
 ## Phase 1
 
@@ -15,8 +18,10 @@ Phase 1 creates the first `Vault MGMT` implementation:
 - manager domain models
 - live-directive manager service
 - lightweight FastAPI app
-- seeded operator interface UI
+- operator interface UI with a separate management surface
 - JSON API endpoints for live state, directives, controls, and baseline commits
+- public market-intel fetchers for Binance, Google News RSS, and Reddit RSS
+- runtime adapter for local POLY dashboard sync
 
 ## Safety
 
@@ -38,10 +43,9 @@ Then open:
 
 ## Next steps
 
-- connect to the Poly Agent runtime in `polymarket-pipeline`
-- replace seeded data with live telemetry adapters
-- mirror the stronger MGMT control-room interface from local development
+- deepen the runtime adapter with richer execution telemetry
 - add persistent storage and event history
+- add stronger replay and backtest adapters
 - wire runtime-safe controls into execution adapters
 
 ## Collaboration

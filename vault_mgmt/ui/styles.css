@@ -1,7 +1,7 @@
 :root {
   --bg: #f2eee6;
   --paper: #f8f3e8;
-  --panel: rgba(255, 252, 246, 0.82);
+  --panel: rgba(255, 252, 246, 0.84);
   --line: rgba(36, 29, 21, 0.13);
   --line-strong: rgba(36, 29, 21, 0.24);
   --ink: #1f1a15;
@@ -45,7 +45,7 @@ body::before {
 .shell {
   position: relative;
   z-index: 1;
-  width: min(1460px, calc(100vw - 28px));
+  width: min(1480px, calc(100vw - 28px));
   margin: 18px auto 36px;
 }
 
@@ -66,7 +66,7 @@ body::before {
 }
 
 .masthead-copy {
-  max-width: 820px;
+  max-width: 860px;
 }
 
 .eyebrow,
@@ -99,17 +99,26 @@ h2 {
 .lede,
 .panel-head p,
 .hero-review,
-.chart-meta {
+.chart-meta,
+.panel-summary,
+.runtime-brief p {
   color: var(--muted);
   line-height: 1.6;
 }
 
 .masthead-actions,
 .hero-actions,
-.interventions {
+.interventions,
+.endpoint-list,
+.trigger-list {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+.masthead-actions,
+.hero-actions,
+.interventions {
   justify-content: flex-end;
 }
 
@@ -129,7 +138,7 @@ h2 {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: transform 0.18s ease, border-color 0.18s ease;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
 }
 
 .solid-btn {
@@ -146,7 +155,7 @@ h2 {
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
+  grid-template-columns: minmax(0, 1.06fr) minmax(360px, 0.94fr);
   margin-top: 18px;
   overflow: hidden;
 }
@@ -168,16 +177,53 @@ h2 {
   gap: 10px;
 }
 
-.pill {
+.pill,
+.tag {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   padding: 10px 12px;
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.34);
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+}
+
+.tag {
+  padding: 7px 9px;
+  font-size: 10px;
+}
+
+.tag.bullish,
+.tag.active,
+.tag.up,
+.tag.connected {
+  border-color: rgba(15, 106, 89, 0.32);
+  color: var(--signal);
+}
+
+.tag.bearish,
+.tag.warn,
+.tag.disconnected,
+.tag.paused {
+  border-color: rgba(176, 74, 40, 0.28);
+  color: var(--risk);
+}
+
+.tag.mixed,
+.tag.neutral,
+.tag.watch,
+.tag.standby,
+.tag.guarded,
+.tag.muted {
+  color: var(--muted);
+}
+
+.tag.oversold,
+.tag.overbought,
+.tag.caution {
+  color: var(--warn);
 }
 
 .metrics {
@@ -187,7 +233,9 @@ h2 {
   margin: 18px 0;
 }
 
-.metric {
+.metric,
+.ticker-card,
+.tech-card {
   padding: 14px;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.28);
@@ -202,12 +250,14 @@ h2 {
   margin-bottom: 8px;
 }
 
-.metric .value {
+.metric .value,
+.ticker-price {
   display: block;
   font: 700 26px / 1 var(--sans);
 }
 
-.metric .meta {
+.metric .meta,
+.ticker-meta {
   display: block;
   margin-top: 6px;
   color: var(--muted);
@@ -218,7 +268,10 @@ h2 {
 .hero-detail,
 .chart-top,
 .panel-head,
-.item-head {
+.item-head,
+.ticker-head,
+.tech-top,
+.runtime-brief {
   display: flex;
   justify-content: space-between;
   gap: 16px;
@@ -227,6 +280,12 @@ h2 {
 
 .hero-actions {
   min-width: 220px;
+}
+
+.runtime-brief {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
 }
 
 .chart-frame {
@@ -263,10 +322,17 @@ h2 {
 }
 
 .control-grid,
-.two-col {
+.two-col,
+.ticker-grid,
+.technical-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
+}
+
+.ticker-grid,
+.technical-grid {
+  margin-top: 14px;
 }
 
 .field {
@@ -336,7 +402,9 @@ textarea {
 
 .item p,
 .diff-item p,
-.audit-item p {
+.audit-item p,
+.ticker-card p,
+.tech-card p {
   margin-bottom: 0;
 }
 
@@ -358,6 +426,27 @@ textarea {
   text-decoration: underline;
 }
 
+.warn {
+  border-color: rgba(176, 74, 40, 0.22);
+}
+
+.caution {
+  border-color: rgba(154, 108, 22, 0.24);
+}
+
+.tech-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px dashed rgba(36, 29, 21, 0.12);
+  font-size: 12px;
+}
+
+.tech-row:last-of-type {
+  border-bottom: 0;
+}
+
 .toast {
   position: fixed;
   right: 18px;
@@ -373,7 +462,7 @@ textarea {
   display: none;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1180px) {
   .hero,
   .workspace,
   .two-col {
@@ -386,9 +475,9 @@ textarea {
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 820px) {
   .shell {
-    width: min(100vw - 16px, 1460px);
+    width: min(100vw - 16px, 1480px);
     margin: 8px auto 20px;
   }
 
@@ -405,6 +494,7 @@ textarea {
   .hero-detail,
   .chart-top,
   .panel-head,
+  .runtime-brief,
   .masthead-actions,
   .hero-actions,
   .interventions {
@@ -413,7 +503,9 @@ textarea {
   }
 
   .metrics,
-  .control-grid {
+  .control-grid,
+  .ticker-grid,
+  .technical-grid {
     grid-template-columns: 1fr;
   }
 

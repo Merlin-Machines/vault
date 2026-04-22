@@ -12,7 +12,7 @@ from .policy import PolicyError
 from .service import manager_service
 
 
-app = FastAPI(title="Vault MGMT", version="0.2.0")
+app = FastAPI(title="Vault MGMT", version="0.3.0")
 app.mount("/static", StaticFiles(directory="vault_mgmt/ui"), name="static")
 
 
