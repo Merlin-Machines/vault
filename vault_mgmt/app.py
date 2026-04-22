@@ -1,42 +1,51 @@
 from __future__ import annotations
 
+from typing import Optional
+
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from .models import ActionState, InterventionType, ManagerMode, RiskPosture
+from .models import InterventionType, StrategyMode
 from .policy import PolicyError
 from .service import manager_service
 
 
-app = FastAPI(title="Vault MGMT", version="0.1.0")
+app = FastAPI(title="Vault MGMT", version="0.2.0")
 app.mount("/static", StaticFiles(directory="vault_mgmt/ui"), name="static")
 
 
-class ModeRequest(BaseModel):
-    mode: ManagerMode
+class DirectiveRequest(BaseModel):
+    name: Optional[str] = None
+    proposal_text: str
 
 
-class PostureRequest(BaseModel):
-    posture: RiskPosture
+class ControlsRequest(BaseModel):
+    trading_enabled: Optional[bool] = None
+    strategy_mode: Optional[StrategyMode] = None
+    continuous_trading: Optional[bool] = None
+    base_size_usdc: Optional[float] = None
+    max_size_usdc: Optional[float] = None
+    max_entries_per_cycle: Optional[int] = None
+    max_hold_minutes: Optional[int] = None
+    stop_loss_pct: Optional[float] = None
+    profit_take_pct: Optional[float] = None
+    alignment_required: Optional[int] = None
+    dca_enabled: Optional[bool] = None
+    use_news_context: Optional[bool] = None
+    use_weather_context: Optional[bool] = None
+    use_tradingview_reference: Optional[bool] = None
+    crypto_enabled: Optional[bool] = None
+    weather_enabled: Optional[bool] = None
 
 
-class GuidanceRequest(BaseModel):
-    notes: str
+class TradingRequest(BaseModel):
+    enabled: bool
 
 
-class PolicyRequest(BaseModel):
-    max_position_size_usd: float
-    max_daily_loss_usd: float
-    confidence_threshold: float
-    allow_market_orders: bool
-    require_human_approval: bool
-
-
-class GuidanceActionRequest(BaseModel):
-    action_id: str
-    state: ActionState
+class BaselineRequest(BaseModel):
+    name: Optional[str] = None
 
 
 class InterventionRequest(BaseModel):
@@ -53,44 +62,31 @@ def get_manager_state():
     return manager_service.get_state()
 
 
-@app.post("/api/manager/mode")
-def update_mode(payload: ModeRequest):
+@app.post("/api/manager/directive")
+def update_directive(payload: DirectiveRequest):
     try:
-        return manager_service.update_mode(payload.mode)
+        return manager_service.update_directive(payload.name or "", payload.proposal_text)
     except PolicyError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-@app.post("/api/manager/posture")
-def update_posture(payload: PostureRequest):
-    return manager_service.update_posture(payload.posture)
-
-
-@app.post("/api/manager/guidance")
-def update_guidance(payload: GuidanceRequest):
-    return manager_service.update_guidance(payload.notes)
-
-
-@app.post("/api/manager/policies")
-def update_policies(payload: PolicyRequest):
+@app.post("/api/manager/controls")
+def update_controls(payload: ControlsRequest):
+    body = payload.model_dump(exclude_none=True)
     try:
-        return manager_service.update_policies(
-            max_position_size_usd=payload.max_position_size_usd,
-            max_daily_loss_usd=payload.max_daily_loss_usd,
-            confidence_threshold=payload.confidence_threshold,
-            allow_market_orders=payload.allow_market_orders,
-            require_human_approval=payload.require_human_approval,
-        )
+        return manager_service.update_controls(**body)
     except PolicyError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-@app.post("/api/manager/guidance/action")
-def apply_guidance_action(payload: GuidanceActionRequest):
-    try:
-        return manager_service.apply_guidance_action(payload.action_id, payload.state)
-    except PolicyError as exc:
-        raise HTTPException(status_code=404, detail=str(exc)) from exc
+@app.post("/api/manager/trading")
+def update_trading(payload: TradingRequest):
+    return manager_service.set_trading_enabled(payload.enabled)
+
+
+@app.post("/api/manager/baseline")
+def commit_baseline(payload: BaselineRequest):
+    return manager_service.commit_baseline(payload.name)
 
 
 @app.post("/api/manager/intervention")

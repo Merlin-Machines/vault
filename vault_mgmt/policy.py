@@ -1,33 +1,27 @@
 from __future__ import annotations
 
-from .models import ManagerMode, ManagerState
-
 
 class PolicyError(ValueError):
-    """Raised when a requested manager change violates policy."""
-
-
-def validate_mode_transition(current: ManagerMode, requested: ManagerMode) -> None:
-    if current == ManagerMode.OBSERVE and requested == ManagerMode.GATED_LIVE:
-        raise PolicyError(
-            "Direct transition from observe to gated_live is blocked. Move through paper mode first."
-        )
+    """Raised when a requested manager change violates the local safety rules."""
 
 
 def validate_position_limit(value: float) -> None:
     if value <= 0:
         raise PolicyError("Position limit must be greater than zero.")
-    if value > 5000:
-        raise PolicyError("Position limit above 5000 USD is blocked in phase 1.")
+    if value > 20:
+        raise PolicyError("Position limit above 20 USDC is blocked in the seeded repo state.")
 
 
-def validate_confidence_threshold(value: float) -> None:
-    if not 0.5 <= value <= 0.99:
-        raise PolicyError("Confidence threshold must remain between 0.50 and 0.99.")
+def validate_probability_threshold(value: int) -> None:
+    if not 1 <= value <= 5:
+        raise PolicyError("Indicator alignment must remain between 1 and 5.")
 
 
-def enforce_phase_one_guardrails(manager: ManagerState) -> None:
-    if manager.mode == ManagerMode.GATED_LIVE:
-        raise PolicyError(
-            "Phase 1 keeps the manager dry-run safe. gated_live may be represented in UI, but not activated."
-        )
+def validate_pct(value: float, label: str) -> None:
+    if not 0.0 <= value <= 0.5:
+        raise PolicyError(f"{label} must remain between 0.00 and 0.50.")
+
+
+def validate_hold_minutes(value: int) -> None:
+    if not 5 <= value <= 720:
+        raise PolicyError("Hold cap must remain between 5 and 720 minutes.")

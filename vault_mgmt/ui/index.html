@@ -4,86 +4,207 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vault MGMT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="/static/styles.css" />
   </head>
   <body>
-    <header class="topbar">
-      <div>
-        <p class="eyebrow">Poly Agent leadership console</p>
-        <h1>Vault MGMT</h1>
-      </div>
-      <div class="status-pill" id="agent-state-pill">Loading...</div>
-    </header>
+    <div class="shell">
+      <header class="masthead">
+        <div class="masthead-copy">
+          <p class="eyebrow">GitHub Coordination Hub</p>
+          <h1>Vault MGMT</h1>
+          <p class="lede">
+            The shared manager layer for Chat dev and Codex. Live directives stay visible,
+            safe runtime knobs stay operator-controlled, and the repo remains dry-run safe.
+          </p>
+        </div>
+        <div class="masthead-actions">
+          <a class="link-btn" href="https://github.com/Merlin-Machines/vault" target="_blank" rel="noreferrer">Open Repo</a>
+          <button class="ghost-btn" id="refresh-now" type="button">Refresh</button>
+          <button class="solid-btn" id="toggle-trading" type="button">Toggle Trading</button>
+        </div>
+      </header>
 
-    <main class="grid">
-      <section class="card overview">
-        <h2>Overview</h2>
-        <div class="stats" id="overview-stats"></div>
-      </section>
+      <section class="hero">
+        <div class="hero-main">
+          <div class="hero-strip">
+            <div class="pill" id="runtime-pill">Loading</div>
+            <div class="pill" id="live-pill">Live directive</div>
+            <div class="pill" id="baseline-pill">Baseline</div>
+            <div class="pill" id="mode-pill">Mode</div>
+          </div>
 
-      <section class="card">
-        <h2>Mission & Guidance</h2>
-        <p id="mission"></p>
-        <textarea id="guidance-input" rows="5"></textarea>
-        <button id="save-guidance">Save guidance</button>
-      </section>
+          <div class="metrics" id="metrics"></div>
 
-      <section class="card">
-        <h2>Mode & Posture</h2>
-        <label>
-          Mode
-          <select id="mode-select">
-            <option value="observe">observe</option>
-            <option value="paper">paper</option>
-            <option value="gated_live">gated_live</option>
-          </select>
-        </label>
-        <label>
-          Posture
-          <select id="posture-select">
-            <option value="defensive">defensive</option>
-            <option value="balanced">balanced</option>
-            <option value="aggressive">aggressive</option>
-          </select>
-        </label>
-        <div class="button-row">
-          <button id="save-mode">Apply mode</button>
-          <button id="save-posture">Apply posture</button>
+          <div class="hero-detail">
+            <div>
+              <div class="subhead">Manager review</div>
+              <p class="hero-review" id="hero-review">Waiting for manager review.</p>
+            </div>
+            <div class="hero-actions">
+              <button class="solid-btn" id="apply-controls" type="button">Apply Safe Knobs</button>
+              <button class="ghost-btn" id="update-directive" type="button">Update Live Directive</button>
+              <button class="ghost-btn" id="commit-baseline" type="button">Commit Baseline</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-chart">
+          <div class="chart-top">
+            <input id="tv-symbol" type="text" value="BINANCE:BTCUSDT" spellcheck="false" />
+            <button class="ghost-btn" id="reload-chart" type="button">Reload Chart</button>
+          </div>
+          <div class="chart-frame">
+            <div id="tv-stage" class="tradingview-widget-container">
+              <div class="tradingview-widget-container__widget"></div>
+            </div>
+          </div>
+          <div class="chart-meta" id="chart-meta">TradingView status loading.</div>
         </div>
       </section>
 
-      <section class="card">
-        <h2>Policies</h2>
-        <div class="form-grid">
-          <label>Max position size (USD)<input id="max-position" type="number" step="0.01" /></label>
-          <label>Max daily loss (USD)<input id="max-daily-loss" type="number" step="0.01" /></label>
-          <label>Confidence threshold<input id="confidence-threshold" type="number" step="0.01" min="0" max="1" /></label>
-          <label class="checkbox"><input id="allow-market-orders" type="checkbox" />Allow market orders</label>
-          <label class="checkbox"><input id="require-approval" type="checkbox" />Require human approval</label>
-        </div>
-        <button id="save-policies">Save policies</button>
-      </section>
+      <main class="workspace">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Directive Composer</h2>
+              <p>Use plain language. In this repo, the directive becomes the live manager narrative immediately.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <label class="field">
+              <span>Profile Name</span>
+              <input id="profile-name" type="text" spellcheck="false" />
+            </label>
+            <label class="field">
+              <span>Live Directive</span>
+              <textarea id="directive-text" rows="9" spellcheck="false"></textarea>
+            </label>
+          </div>
+        </section>
 
-      <section class="card">
-        <h2>Recommended Actions</h2>
-        <div id="guidance-actions" class="stack"></div>
-      </section>
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Safe Runtime Knobs</h2>
+              <p>These controls are the shared surface between manager intent and execution runtime.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="control-grid">
+              <label class="field">
+                <span>Strategy Mode</span>
+                <select id="strategy-mode">
+                  <option value="conservative">conservative</option>
+                  <option value="balanced">balanced</option>
+                  <option value="crypto_only">crypto_only</option>
+                  <option value="weather_only">weather_only</option>
+                  <option value="legacy_aggressive">legacy_aggressive</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Base Size USDC</span>
+                <input id="base-size" type="number" min="0.5" max="20" step="0.25" />
+              </label>
+              <label class="field">
+                <span>Max Size USDC</span>
+                <input id="max-size" type="number" min="1" max="20" step="0.25" />
+              </label>
+              <label class="field">
+                <span>Entries / Cycle</span>
+                <input id="max-entries" type="number" min="1" max="5" step="1" />
+              </label>
+              <label class="field">
+                <span>Hold Cap Minutes</span>
+                <input id="max-hold" type="number" min="5" max="720" step="5" />
+              </label>
+              <label class="field">
+                <span>Stop Loss Pct</span>
+                <input id="stop-loss" type="number" min="0" max="0.5" step="0.01" />
+              </label>
+              <label class="field">
+                <span>Profit Take Pct</span>
+                <input id="profit-take" type="number" min="0" max="0.5" step="0.01" />
+              </label>
+              <label class="field">
+                <span>Indicator Alignment</span>
+                <input id="alignment-required" type="number" min="1" max="5" step="1" />
+              </label>
+            </div>
 
-      <section class="card">
-        <h2>Interventions</h2>
-        <div class="button-grid">
-          <button data-intervention="pause">Pause</button>
-          <button data-intervention="resume">Resume</button>
-          <button data-intervention="force_dry_run">Force dry-run</button>
-          <button data-intervention="require_approval">Require approval</button>
-        </div>
-      </section>
+            <div class="toggle-grid">
+              <label class="check"><input id="continuous-trading" type="checkbox" />Continuous trading</label>
+              <label class="check"><input id="dca-enabled" type="checkbox" />DCA enabled</label>
+              <label class="check"><input id="crypto-enabled" type="checkbox" />Crypto enabled</label>
+              <label class="check"><input id="weather-enabled" type="checkbox" />Weather enabled</label>
+              <label class="check"><input id="use-news" type="checkbox" />News context</label>
+              <label class="check"><input id="use-weather" type="checkbox" />Weather context</label>
+              <label class="check"><input id="use-tradingview" type="checkbox" />TradingView reference</label>
+            </div>
+          </div>
+        </section>
 
-      <section class="card full-width">
-        <h2>Audit Timeline</h2>
-        <div id="audit-log" class="stack"></div>
-      </section>
-    </main>
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Review + Validation</h2>
+              <p>Keep the shared repo honest about what is seeded and what still needs runtime wiring.</p>
+            </div>
+          </div>
+          <div class="panel-body two-col">
+            <div>
+              <div class="subhead">Review</div>
+              <div id="review-list" class="stack-list"></div>
+            </div>
+            <div>
+              <div class="subhead">Validation</div>
+              <div id="validation-list" class="stack-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Integrations + Workflow</h2>
+              <p>Track source intent here while the runtime adapter catches up.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div id="integrations-list" class="stack-list"></div>
+          </div>
+        </section>
+
+        <section class="panel panel-wide">
+          <div class="panel-head">
+            <div>
+              <h2>Diff + Audit</h2>
+              <p>Baseline drift and operator actions stay visible so Chat dev and Codex see the same state story.</p>
+            </div>
+            <div class="interventions">
+              <button class="ghost-btn" data-intervention="pause" type="button">Pause</button>
+              <button class="ghost-btn" data-intervention="resume" type="button">Resume</button>
+              <button class="ghost-btn" data-intervention="commit_baseline" type="button">Commit Baseline</button>
+            </div>
+          </div>
+          <div class="panel-body two-col">
+            <div>
+              <div class="subhead">Live Diff</div>
+              <div id="diff-list" class="stack-list"></div>
+            </div>
+            <div>
+              <div class="subhead">Audit Timeline</div>
+              <div id="audit-list" class="stack-list"></div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
 
     <div id="toast" class="toast hidden"></div>
     <script src="/static/app.js" defer></script>

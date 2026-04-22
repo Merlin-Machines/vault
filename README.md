@@ -4,8 +4,8 @@ Vault MGMT is the manager layer for the Poly Agent ecosystem.
 
 This repository starts with a dry-run-safe manager shell focused on:
 - leadership and guidance
-- policy enforcement
-- approvals and intervention gates
+- live manager directives
+- safe runtime knobs
 - operator-facing interface
 - audit visibility
 
@@ -13,15 +13,17 @@ This repository starts with a dry-run-safe manager shell focused on:
 
 Phase 1 creates the first `Vault MGMT` implementation:
 - manager domain models
-- policy and intervention service
+- live-directive manager service
 - lightweight FastAPI app
 - seeded operator interface UI
-- JSON API endpoints for state, guidance, and interventions
+- JSON API endpoints for live state, directives, controls, and baseline commits
 
 ## Safety
 
 This scaffold is intentionally dry-run oriented.
 No live trading actions are enabled in this repository.
+The current product direction is that MGMT directs the agent through runtime
+state rather than acting as an approval-only gate.
 
 ## Run locally
 
@@ -38,6 +40,11 @@ Then open:
 
 - connect to the Poly Agent runtime in `polymarket-pipeline`
 - replace seeded data with live telemetry adapters
-- add authentication and role-based approvals
+- mirror the stronger MGMT control-room interface from local development
 - add persistent storage and event history
-- wire policies into execution guards
+- wire runtime-safe controls into execution adapters
+
+## Collaboration
+
+- Shared workflow notes live in `docs/MGMT_COLLAB_WORKFLOW.md`
+- Current operator intent and handoff notes live in `docs/MGMT_HANDOFF.md`
