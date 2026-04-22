@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vault MGMT</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Poly Agent leadership console</p>
+        <h1>Vault MGMT</h1>
+      </div>
+      <div class="status-pill" id="agent-state-pill">Loading...</div>
+    </header>
+
+    <main class="grid">
+      <section class="card overview">
+        <h2>Overview</h2>
+        <div class="stats" id="overview-stats"></div>
+      </section>
+
+      <section class="card">
+        <h2>Mission & Guidance</h2>
+        <p id="mission"></p>
+        <textarea id="guidance-input" rows="5"></textarea>
+        <button id="save-guidance">Save guidance</button>
+      </section>
+
+      <section class="card">
+        <h2>Mode & Posture</h2>
+        <label>
+          Mode
+          <select id="mode-select">
+            <option value="observe">observe</option>
+            <option value="paper">paper</option>
+            <option value="gated_live">gated_live</option>
+          </select>
+        </label>
+        <label>
+          Posture
+          <select id="posture-select">
+            <option value="defensive">defensive</option>
+            <option value="balanced">balanced</option>
+            <option value="aggressive">aggressive</option>
+          </select>
+        </label>
+        <div class="button-row">
+          <button id="save-mode">Apply mode</button>
+          <button id="save-posture">Apply posture</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Policies</h2>
+        <div class="form-grid">
+          <label>Max position size (USD)<input id="max-position" type="number" step="0.01" /></label>
+          <label>Max daily loss (USD)<input id="max-daily-loss" type="number" step="0.01" /></label>
+          <label>Confidence threshold<input id="confidence-threshold" type="number" step="0.01" min="0" max="1" /></label>
+          <label class="checkbox"><input id="allow-market-orders" type="checkbox" />Allow market orders</label>
+          <label class="checkbox"><input id="require-approval" type="checkbox" />Require human approval</label>
+        </div>
+        <button id="save-policies">Save policies</button>
+      </section>
+
+      <section class="card">
+        <h2>Recommended Actions</h2>
+        <div id="guidance-actions" class="stack"></div>
+      </section>
+
+      <section class="card">
+        <h2>Interventions</h2>
+        <div class="button-grid">
+          <button data-intervention="pause">Pause</button>
+          <button data-intervention="resume">Resume</button>
+          <button data-intervention="force_dry_run">Force dry-run</button>
+          <button data-intervention="require_approval">Require approval</button>
+        </div>
+      </section>
+
+      <section class="card full-width">
+        <h2>Audit Timeline</h2>
+        <div id="audit-log" class="stack"></div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast hidden"></div>
+    <script src="/static/app.js" defer></script>
+  </body>
+</html>
