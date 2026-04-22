@@ -38,6 +38,9 @@
             <div class="pill" id="live-pill">Live directive</div>
             <div class="pill" id="baseline-pill">Baseline</div>
             <div class="pill" id="mode-pill">Mode</div>
+            <div class="pill" id="runtime-source-pill">Runtime source</div>
+            <div class="pill" id="live-source-pill">Live source</div>
+            <div class="pill" id="baseline-source-pill">Baseline source</div>
           </div>
 
           <div class="metrics" id="metrics"></div>
@@ -87,11 +90,17 @@
           </div>
           <div class="panel-body">
             <label class="field">
-              <span>Profile Name</span>
+              <span>
+                Profile Name
+                <span class="info-tip" tabindex="0" data-tip="Name for this strategy profile. Use stable names so rollback and audit are easy.">(i)</span>
+              </span>
               <input id="profile-name" type="text" spellcheck="false" />
             </label>
             <label class="field">
-              <span>Live Directive</span>
+              <span>
+                Live Directive
+                <span class="info-tip" tabindex="0" data-tip="Plain-language manager intent. In this build, auto-apply can make pending directives live quickly.">(i)</span>
+              </span>
               <textarea id="directive-text" rows="10" spellcheck="false"></textarea>
             </label>
           </div>
@@ -121,7 +130,10 @@
           <div class="panel-body">
             <div class="control-grid">
               <label class="field">
-                <span>Strategy Mode</span>
+                <span>
+                  Strategy Mode
+                  <span class="info-tip" tabindex="0" data-tip="Top-level behavior preset for runtime filters and execution posture.">(i)</span>
+                </span>
                 <select id="strategy-mode">
                   <option value="conservative">conservative</option>
                   <option value="balanced">balanced</option>
@@ -131,43 +143,99 @@
                 </select>
               </label>
               <label class="field">
-                <span>Base Size USDC</span>
+                <span>
+                  Base Size USDC
+                  <span class="info-tip" tabindex="0" data-tip="Default first entry size. Keep this small while tuning strategy behavior.">(i)</span>
+                </span>
                 <input id="base-size" type="number" min="0.5" max="20" step="0.25" />
               </label>
               <label class="field">
-                <span>Max Size USDC</span>
+                <span>
+                  Max Size USDC
+                  <span class="info-tip" tabindex="0" data-tip="Hard cap per trade cycle. This limits exposure even when DCA is enabled.">(i)</span>
+                </span>
                 <input id="max-size" type="number" min="1" max="20" step="0.25" />
               </label>
               <label class="field">
-                <span>Entries / Cycle</span>
-                <input id="max-entries" type="number" min="1" max="5" step="1" />
+                <span>
+                  Entries / Cycle
+                  <span class="info-tip" tabindex="0" data-tip="Maximum scaling attempts before standing down and waiting for a new setup.">(i)</span>
+                </span>
+                <select id="max-entries">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                </select>
               </label>
               <label class="field">
-                <span>Hold Cap Minutes</span>
-                <input id="max-hold" type="number" min="5" max="720" step="5" />
+                <span>
+                  Hold Cap Minutes
+                  <span class="info-tip" tabindex="0" data-tip="Maximum hold window per position before forced exit logic can trigger.">(i)</span>
+                </span>
+                <select id="max-hold">
+                  <option value="15">15</option>
+                  <option value="30">30</option>
+                  <option value="45">45</option>
+                  <option value="60">60</option>
+                  <option value="90">90</option>
+                  <option value="120">120</option>
+                </select>
               </label>
               <label class="field">
-                <span>Stop Loss Pct</span>
-                <input id="stop-loss" type="number" min="0" max="0.5" step="0.01" />
+                <span>
+                  Stop Loss Pct
+                  <span class="info-tip" tabindex="0" data-tip="Loss threshold to cut downside. Example: 0.05 = 5 percent.">(i)</span>
+                </span>
+                <select id="stop-loss">
+                  <option value="0.01">0.01 (1%)</option>
+                  <option value="0.02">0.02 (2%)</option>
+                  <option value="0.03">0.03 (3%)</option>
+                  <option value="0.04">0.04 (4%)</option>
+                  <option value="0.05">0.05 (5%)</option>
+                  <option value="0.07">0.07 (7%)</option>
+                  <option value="0.1">0.10 (10%)</option>
+                </select>
               </label>
               <label class="field">
-                <span>Profit Take Pct</span>
-                <input id="profit-take" type="number" min="0" max="0.5" step="0.01" />
+                <span>
+                  Profit Take Pct
+                  <span class="info-tip" tabindex="0" data-tip="Target gain for scale-out or exit. Example: 0.03 = 3 percent.">(i)</span>
+                </span>
+                <select id="profit-take">
+                  <option value="0.01">0.01 (1%)</option>
+                  <option value="0.015">0.015 (1.5%)</option>
+                  <option value="0.02">0.02 (2%)</option>
+                  <option value="0.03">0.03 (3%)</option>
+                  <option value="0.04">0.04 (4%)</option>
+                  <option value="0.05">0.05 (5%)</option>
+                  <option value="0.07">0.07 (7%)</option>
+                </select>
               </label>
               <label class="field">
-                <span>Indicator Alignment</span>
-                <input id="alignment-required" type="number" min="1" max="5" step="1" />
+                <span>
+                  Indicator Alignment
+                  <span class="info-tip" tabindex="0" data-tip="How many signals must agree before entry logic is considered valid.">(i)</span>
+                </span>
+                <select id="alignment-required">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                </select>
               </label>
             </div>
 
             <div class="toggle-grid">
-              <label class="check"><input id="continuous-trading" type="checkbox" />Continuous trading</label>
-              <label class="check"><input id="dca-enabled" type="checkbox" />DCA enabled</label>
-              <label class="check"><input id="crypto-enabled" type="checkbox" />Crypto enabled</label>
-              <label class="check"><input id="weather-enabled" type="checkbox" />Weather enabled</label>
-              <label class="check"><input id="use-news" type="checkbox" />News context</label>
-              <label class="check"><input id="use-weather" type="checkbox" />Weather context</label>
-              <label class="check"><input id="use-tradingview" type="checkbox" />TradingView reference</label>
+              <label class="check"><input id="continuous-trading" type="checkbox" />Continuous trading <span class="info-tip" tabindex="0" data-tip="Keeps the runtime hunting for setups instead of waiting for long idle periods.">(i)</span></label>
+              <label class="check"><input id="dca-enabled" type="checkbox" />DCA enabled <span class="info-tip" tabindex="0" data-tip="Allows controlled averaging with max size and entries still enforced.">(i)</span></label>
+              <label class="check"><input id="crypto-enabled" type="checkbox" />Crypto enabled <span class="info-tip" tabindex="0" data-tip="Enables crypto-linked opportunity filters in runtime strategies.">(i)</span></label>
+              <label class="check"><input id="weather-enabled" type="checkbox" />Weather enabled <span class="info-tip" tabindex="0" data-tip="Turns on weather-sensitive rule paths when configured for relevant markets.">(i)</span></label>
+              <label class="check"><input id="use-news" type="checkbox" />News context <span class="info-tip" tabindex="0" data-tip="Uses news as a context filter, not as a standalone signal.">(i)</span></label>
+              <label class="check"><input id="use-weather" type="checkbox" />Weather context <span class="info-tip" tabindex="0" data-tip="Uses weather overlays as directional context where applicable.">(i)</span></label>
+              <label class="check"><input id="use-tradingview" type="checkbox" />TradingView reference <span class="info-tip" tabindex="0" data-tip="Keeps chart context visible for operator validation; execution still uses runtime signals.">(i)</span></label>
             </div>
           </div>
         </section>

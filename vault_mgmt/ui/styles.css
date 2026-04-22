@@ -190,6 +190,49 @@ h2 {
   letter-spacing: 0.08em;
 }
 
+.info-tip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  margin-left: 6px;
+  font-size: 10px;
+  line-height: 1;
+  color: var(--muted);
+  cursor: help;
+}
+
+.info-tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 220px;
+  max-width: 280px;
+  padding: 8px 9px;
+  border: 1px solid var(--line-strong);
+  background: #fffdf9;
+  color: var(--ink);
+  text-transform: none;
+  letter-spacing: 0.01em;
+  font-size: 11px;
+  line-height: 1.35;
+  box-shadow: 0 14px 24px rgba(36, 29, 21, 0.12);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 8;
+}
+
+.info-tip:hover::after,
+.info-tip:focus-visible::after {
+  opacity: 1;
+}
+
 .tag {
   padding: 7px 9px;
   font-size: 10px;
@@ -218,6 +261,12 @@ h2 {
 .tag.guarded,
 .tag.muted {
   color: var(--muted);
+}
+
+#runtime-source-pill,
+#live-source-pill,
+#baseline-source-pill {
+  color: var(--accent);
 }
 
 .tag.oversold,

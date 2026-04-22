@@ -90,6 +90,9 @@ function renderTop(manager) {
   document.getElementById("live-pill").textContent = `Live: ${live.name}`;
   document.getElementById("baseline-pill").textContent = `Baseline: ${baseline.name}`;
   document.getElementById("mode-pill").textContent = `Mode: ${controls.strategy_mode}`;
+  document.getElementById("runtime-source-pill").textContent = `Runtime source: ${runtime.source || "seeded"}`;
+  document.getElementById("live-source-pill").textContent = `Live source: ${live.source || "seeded"}`;
+  document.getElementById("baseline-source-pill").textContent = `Baseline source: ${baseline.source || "seeded"}`;
   document.getElementById("hero-review").textContent = review.headline;
   document.getElementById("toggle-trading").textContent = controls.trading_enabled ? "Pause Trading" : "Resume Trading";
 
