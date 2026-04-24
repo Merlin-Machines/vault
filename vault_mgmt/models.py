@@ -19,6 +19,12 @@ class StrategyMode(str, Enum):
     LEGACY_AGGRESSIVE = "legacy_aggressive"
 
 
+class AggressionIntensity(str, Enum):
+    MODERATE = "moderate"
+    ASSERTIVE = "assertive"
+    MAX = "max"
+
+
 class InterventionType(str, Enum):
     PAUSE = "pause"
     RESUME = "resume"
@@ -57,6 +63,20 @@ class SafeControls(BaseModel):
     use_tradingview_reference: bool = True
     crypto_enabled: bool = True
     weather_enabled: bool = True
+
+
+class AggressionState(BaseModel):
+    enabled: bool = False
+    status: str = "idle"
+    intensity: AggressionIntensity = AggressionIntensity.MODERATE
+    duration_minutes: int = 0
+    min_edge_pct: float = 5.0
+    profit_target_pct: float = 3.0
+    started_at: datetime | None = None
+    until: datetime | None = None
+    ended_at: datetime | None = None
+    note: str = "No timed aggression window is active."
+    source: str = "operator"
 
 
 class ValidationReplay(BaseModel):
