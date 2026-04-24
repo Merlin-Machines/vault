@@ -4,86 +4,334 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vault MGMT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="/static/styles.css" />
   </head>
   <body>
-    <header class="topbar">
-      <div>
-        <p class="eyebrow">Poly Agent leadership console</p>
-        <h1>Vault MGMT</h1>
-      </div>
-      <div class="status-pill" id="agent-state-pill">Loading...</div>
-    </header>
+    <div class="shell">
+      <header class="masthead">
+        <div class="masthead-copy">
+          <p class="eyebrow">GitHub Coordination Hub</p>
+          <h1>Vault MGMT</h1>
+          <p class="lede">
+            The separate manager console for POLY Agent Merlin. Directives, live runtime sync,
+            market intelligence, and operator-safe knobs all stay visible in one place.
+          </p>
+        </div>
+        <div class="masthead-actions">
+          <a class="link-btn" href="https://github.com/Merlin-Machines/vault" target="_blank" rel="noreferrer">Open Repo</a>
+          <a class="ghost-btn" id="open-runtime-link" href="http://127.0.0.1:7731/mgmt" target="_blank" rel="noreferrer">Open Runtime</a>
+          <button class="ghost-btn" id="refresh-now" type="button">Refresh</button>
+          <button class="solid-btn" id="toggle-trading" type="button">Toggle Trading</button>
+        </div>
+      </header>
 
-    <main class="grid">
-      <section class="card overview">
-        <h2>Overview</h2>
-        <div class="stats" id="overview-stats"></div>
-      </section>
+      <section class="hero">
+        <div class="hero-main">
+          <div class="hero-strip">
+            <div class="pill" id="runtime-pill">Runtime</div>
+            <div class="pill" id="live-pill">Live directive</div>
+            <div class="pill" id="baseline-pill">Baseline</div>
+            <div class="pill" id="mode-pill">Mode</div>
+            <div class="pill" id="runtime-source-pill">Runtime source</div>
+            <div class="pill" id="live-source-pill">Live source</div>
+            <div class="pill" id="baseline-source-pill">Baseline source</div>
+          </div>
 
-      <section class="card">
-        <h2>Mission & Guidance</h2>
-        <p id="mission"></p>
-        <textarea id="guidance-input" rows="5"></textarea>
-        <button id="save-guidance">Save guidance</button>
-      </section>
+          <div class="metrics" id="metrics"></div>
 
-      <section class="card">
-        <h2>Mode & Posture</h2>
-        <label>
-          Mode
-          <select id="mode-select">
-            <option value="observe">observe</option>
-            <option value="paper">paper</option>
-            <option value="gated_live">gated_live</option>
-          </select>
-        </label>
-        <label>
-          Posture
-          <select id="posture-select">
-            <option value="defensive">defensive</option>
-            <option value="balanced">balanced</option>
-            <option value="aggressive">aggressive</option>
-          </select>
-        </label>
-        <div class="button-row">
-          <button id="save-mode">Apply mode</button>
-          <button id="save-posture">Apply posture</button>
+          <div class="hero-detail">
+            <div>
+              <div class="subhead">Manager review</div>
+              <p class="hero-review" id="hero-review">Waiting for manager review.</p>
+            </div>
+            <div class="hero-actions">
+              <button class="solid-btn" id="apply-controls" type="button">Apply Safe Knobs</button>
+              <button class="ghost-btn" id="update-directive" type="button">Update Live Directive</button>
+              <button class="ghost-btn" id="commit-baseline" type="button">Commit Baseline</button>
+            </div>
+          </div>
+
+          <div class="runtime-brief">
+            <div>
+              <div class="subhead">Runtime bridge</div>
+              <p id="runtime-note">Waiting for runtime handshake.</p>
+            </div>
+            <div class="endpoint-list" id="runtime-endpoints"></div>
+          </div>
+        </div>
+
+        <div class="hero-chart">
+          <div class="chart-top">
+            <input id="tv-symbol" type="text" value="BINANCE:BTCUSDT" spellcheck="false" />
+            <button class="ghost-btn" id="reload-chart" type="button">Reload Chart</button>
+          </div>
+          <div class="chart-frame">
+            <div id="tv-stage" class="tradingview-widget-container">
+              <div class="tradingview-widget-container__widget"></div>
+            </div>
+          </div>
+          <div class="chart-meta" id="chart-meta">TradingView status loading.</div>
         </div>
       </section>
 
-      <section class="card">
-        <h2>Policies</h2>
-        <div class="form-grid">
-          <label>Max position size (USD)<input id="max-position" type="number" step="0.01" /></label>
-          <label>Max daily loss (USD)<input id="max-daily-loss" type="number" step="0.01" /></label>
-          <label>Confidence threshold<input id="confidence-threshold" type="number" step="0.01" min="0" max="1" /></label>
-          <label class="checkbox"><input id="allow-market-orders" type="checkbox" />Allow market orders</label>
-          <label class="checkbox"><input id="require-approval" type="checkbox" />Require human approval</label>
-        </div>
-        <button id="save-policies">Save policies</button>
-      </section>
+      <main class="workspace">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Directive Composer</h2>
+              <p>Write in plain language. Vault keeps it operator-friendly, and syncs it into the runtime when available.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <label class="field">
+              <span>
+                Profile Name
+                <span class="info-tip" tabindex="0" data-tip="Name for this strategy profile. Use stable names so rollback and audit are easy.">(i)</span>
+              </span>
+              <input id="profile-name" type="text" spellcheck="false" />
+            </label>
+            <label class="field">
+              <span>
+                Live Directive
+                <span class="info-tip" tabindex="0" data-tip="Plain-language manager intent. In this build, auto-apply can make pending directives live quickly.">(i)</span>
+              </span>
+              <textarea id="directive-text" rows="10" spellcheck="false"></textarea>
+            </label>
+          </div>
+        </section>
 
-      <section class="card">
-        <h2>Recommended Actions</h2>
-        <div id="guidance-actions" class="stack"></div>
-      </section>
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Market Board</h2>
+              <p>5-minute tape, technical stack, and a compact read on what the manager is looking at right now.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <p class="panel-summary" id="market-summary">Waiting for market snapshot.</p>
+            <div class="ticker-grid" id="ticker-grid"></div>
+            <div class="technical-grid" id="technical-grid"></div>
+          </div>
+        </section>
 
-      <section class="card">
-        <h2>Interventions</h2>
-        <div class="button-grid">
-          <button data-intervention="pause">Pause</button>
-          <button data-intervention="resume">Resume</button>
-          <button data-intervention="force_dry_run">Force dry-run</button>
-          <button data-intervention="require_approval">Require approval</button>
-        </div>
-      </section>
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Safe Runtime Knobs</h2>
+              <p>These controls shape execution behavior without exposing raw code edits in the live agent.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="control-grid">
+              <label class="field">
+                <span>
+                  Strategy Mode
+                  <span class="info-tip" tabindex="0" data-tip="Top-level behavior preset for runtime filters and execution posture.">(i)</span>
+                </span>
+                <select id="strategy-mode">
+                  <option value="conservative">conservative</option>
+                  <option value="balanced">balanced</option>
+                  <option value="crypto_only">crypto_only</option>
+                  <option value="weather_only">weather_only</option>
+                  <option value="legacy_aggressive">legacy_aggressive</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>
+                  Base Size USDC
+                  <span class="info-tip" tabindex="0" data-tip="Default first entry size. Keep this small while tuning strategy behavior.">(i)</span>
+                </span>
+                <input id="base-size" type="number" min="0.5" max="20" step="0.25" />
+              </label>
+              <label class="field">
+                <span>
+                  Max Size USDC
+                  <span class="info-tip" tabindex="0" data-tip="Hard cap per trade cycle. This limits exposure even when DCA is enabled.">(i)</span>
+                </span>
+                <input id="max-size" type="number" min="1" max="20" step="0.25" />
+              </label>
+              <label class="field">
+                <span>
+                  Entries / Cycle
+                  <span class="info-tip" tabindex="0" data-tip="Maximum scaling attempts before standing down and waiting for a new setup.">(i)</span>
+                </span>
+                <select id="max-entries">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>
+                  Hold Cap Minutes
+                  <span class="info-tip" tabindex="0" data-tip="Maximum hold window per position before forced exit logic can trigger.">(i)</span>
+                </span>
+                <select id="max-hold">
+                  <option value="15">15</option>
+                  <option value="30">30</option>
+                  <option value="45">45</option>
+                  <option value="60">60</option>
+                  <option value="90">90</option>
+                  <option value="120">120</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>
+                  Stop Loss Pct
+                  <span class="info-tip" tabindex="0" data-tip="Loss threshold to cut downside. Example: 0.05 = 5 percent.">(i)</span>
+                </span>
+                <select id="stop-loss">
+                  <option value="0.01">0.01 (1%)</option>
+                  <option value="0.02">0.02 (2%)</option>
+                  <option value="0.03">0.03 (3%)</option>
+                  <option value="0.04">0.04 (4%)</option>
+                  <option value="0.05">0.05 (5%)</option>
+                  <option value="0.07">0.07 (7%)</option>
+                  <option value="0.1">0.10 (10%)</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>
+                  Profit Take Pct
+                  <span class="info-tip" tabindex="0" data-tip="Target gain for scale-out or exit. Example: 0.03 = 3 percent.">(i)</span>
+                </span>
+                <select id="profit-take">
+                  <option value="0.01">0.01 (1%)</option>
+                  <option value="0.015">0.015 (1.5%)</option>
+                  <option value="0.02">0.02 (2%)</option>
+                  <option value="0.03">0.03 (3%)</option>
+                  <option value="0.04">0.04 (4%)</option>
+                  <option value="0.05">0.05 (5%)</option>
+                  <option value="0.07">0.07 (7%)</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>
+                  Indicator Alignment
+                  <span class="info-tip" tabindex="0" data-tip="How many signals must agree before entry logic is considered valid.">(i)</span>
+                </span>
+                <select id="alignment-required">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                </select>
+              </label>
+            </div>
 
-      <section class="card full-width">
-        <h2>Audit Timeline</h2>
-        <div id="audit-log" class="stack"></div>
-      </section>
-    </main>
+            <div class="toggle-grid">
+              <label class="check"><input id="continuous-trading" type="checkbox" />Continuous trading <span class="info-tip" tabindex="0" data-tip="Keeps the runtime hunting for setups instead of waiting for long idle periods.">(i)</span></label>
+              <label class="check"><input id="dca-enabled" type="checkbox" />DCA enabled <span class="info-tip" tabindex="0" data-tip="Allows controlled averaging with max size and entries still enforced.">(i)</span></label>
+              <label class="check"><input id="crypto-enabled" type="checkbox" />Crypto enabled <span class="info-tip" tabindex="0" data-tip="Enables crypto-linked opportunity filters in runtime strategies.">(i)</span></label>
+              <label class="check"><input id="weather-enabled" type="checkbox" />Weather enabled <span class="info-tip" tabindex="0" data-tip="Turns on weather-sensitive rule paths when configured for relevant markets.">(i)</span></label>
+              <label class="check"><input id="use-news" type="checkbox" />News context <span class="info-tip" tabindex="0" data-tip="Uses news as a context filter, not as a standalone signal.">(i)</span></label>
+              <label class="check"><input id="use-weather" type="checkbox" />Weather context <span class="info-tip" tabindex="0" data-tip="Uses weather overlays as directional context where applicable.">(i)</span></label>
+              <label class="check"><input id="use-tradingview" type="checkbox" />TradingView reference <span class="info-tip" tabindex="0" data-tip="Keeps chart context visible for operator validation; execution still uses runtime signals.">(i)</span></label>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Review + Validation</h2>
+              <p>Keep the manager honest about edge quality, runtime safety, and how much of this is live versus seeded.</p>
+            </div>
+          </div>
+          <div class="panel-body two-col">
+            <div>
+              <div class="subhead">Review</div>
+              <div id="review-list" class="stack-list"></div>
+            </div>
+            <div>
+              <div class="subhead">Validation</div>
+              <div id="validation-list" class="stack-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Strategy Layers</h2>
+              <p>Separate lenses for dislocations, momentum, catalysts, and risk control so the manager can direct with intent.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div id="layers-list" class="stack-list"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Intel Feed</h2>
+              <p>Live headlines and community scan so the manager can see catalysts without leaving the desk.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div id="intel-list" class="stack-list"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Integrations + Workflow</h2>
+              <p>Track market data, weather, TradingView, and GitHub coordination in one view.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div id="integrations-list" class="stack-list"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Research Library</h2>
+              <p>Quick access to reference material, YouTube searches, repo surfaces, and data sources worth keeping nearby.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div id="research-list" class="stack-list"></div>
+          </div>
+        </section>
+
+        <section class="panel panel-wide">
+          <div class="panel-head">
+            <div>
+              <h2>Diff + Audit</h2>
+              <p>Baseline drift and operator actions stay visible so Chat dev and Codex read the same operational story.</p>
+            </div>
+            <div class="interventions">
+              <button class="ghost-btn" data-intervention="pause" type="button">Pause</button>
+              <button class="ghost-btn" data-intervention="resume" type="button">Resume</button>
+              <button class="ghost-btn" data-intervention="commit_baseline" type="button">Commit Baseline</button>
+            </div>
+          </div>
+          <div class="panel-body two-col">
+            <div>
+              <div class="subhead">Live Diff</div>
+              <div id="diff-list" class="stack-list"></div>
+            </div>
+            <div>
+              <div class="subhead">Audit Timeline</div>
+              <div id="audit-list" class="stack-list"></div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
 
     <div id="toast" class="toast hidden"></div>
     <script src="/static/app.js" defer></script>
